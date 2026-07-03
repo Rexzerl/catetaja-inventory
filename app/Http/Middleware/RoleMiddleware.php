@@ -11,21 +11,23 @@ class RoleMiddleware
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (Auth::check()){
+        // 1. JIKA BELUM login, baru dilempar ke login
+        if (!Auth::check()) {
             return redirect('/login');
         }
 
+        // 2. Ambil role user
         $userRole = Auth::user()->role->name;
 
-        if (inarray($userRole, $roles)) {
+        // 3. Cek apakah role diizinkan (Gunakan in_array dengan benar)
+        if (in_array($userRole, $roles)) {
             return $next($request);
         }
 
+        // Jika login tapi role tidak sesuai, block akses
         abort(403, 'Unauthorized action.');
     }
 }
