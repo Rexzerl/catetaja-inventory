@@ -38,18 +38,36 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+public function store(Request $request)
     {
+        // 1. Tambahkan validasi untuk image
         $request->validate([
             'product_code' => 'required|string|unique:products,product_code',
             'name'         => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
+            'category_id'  => 'required|exists:categories,id',
             'stock'        => 'required|integer|min:0',
             'location'     => 'required|string|max:255',
             'condition'    => 'required|string|max:255',
-        ], ['product_code.unique' => 'Kode produk sudah terdaftar.']);
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maks 2MB
+        ], [
+            'product_code.unique' => 'Kode produk sudah terdaftar.',
+            'image.image'         => 'File harus berupa gambar.',
+            'image.max'           => 'Ukuran gambar maksimal 2MB.'
+        ]);
 
-        \App\Models\Product::create($request->all());
+        // 2. Ambil semua request kecuali image
+        $data = $request->except('image');
+
+        // 3. Logika Upload Gambar
+        if ($request->hasFile('image')) {
+            // Simpan gambar ke folder storage/app/public/products
+            $imagePath = $request->file('image')->store('products', 'public');
+            // Masukkan path gambar ke dalam array data untuk database
+            $data['image'] = $imagePath;
+        }
+
+        // 4. Simpan ke database menggunakan array $data yang sudah rapi
+        \App\Models\Product::create($data);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }

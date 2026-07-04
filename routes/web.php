@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // CRUD Master Data Barang (Hanya Admin dan Staff)
-    Route::middleware(['role:Admin,Staff'])->group(function() {
+    Route::middleware(['role:Admin,Staff,Manager'])->group(function() {
         Route::resource('products', ProductController::class);
         Route::put('borrowings/{id}/return', [App\Http\Controllers\BorrowingController::class, 'returnDevice'])->name('borrowings.return');
         Route::resource('borrowings',BorrowingController::class)->only (['index', 'create', 'store']);
