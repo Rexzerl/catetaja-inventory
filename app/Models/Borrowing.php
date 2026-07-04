@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Borrowing extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = ['user_id','employee_name', 'borrow_date', 'return_date', 'status'];
 
     public function user()
     {

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('borrowing_id')->constrained('borrowings')->onDelete('cascade');
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->integer('quantity');
             $table->string('item_status');
             $table->timestamps();
         });
