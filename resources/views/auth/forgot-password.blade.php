@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Lupa Password - Telkomsel Inventory Management</title>
+    <title>Lupa Password - CatetAja Inventory Management</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
@@ -69,7 +69,7 @@
             
             <div class="relative z-20 w-full mb-10 md:mb-0 max-w-xl">
                 <h1 class="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-white mb-4 tracking-tight">
-                    Atur Pengelolaan Inventarismu dengan Telkomsel Inventory!
+                    Atur Pengelolaan Inventarismu dengan CatetAja!
                 </h1>
                 <p class="text-white/90 text-body-lg font-body-lg max-w-md hidden md:block">
                     Solusi terpercaya untuk manajemen aset dan stok barang dengan kecepatan serta akurasi standar industri.
@@ -113,7 +113,7 @@
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-outline dark:text-outline-variant">
                                 <span class="material-symbols-outlined" data-icon="mail">mail</span>
                             </span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-low dark:bg-surface-dim/10 border-2 border-transparent focus:border-primary dark:focus:border-secondary-container rounded-xl text-on-surface dark:text-on-primary-container placeholder:text-outline/50 transition-all outline-none" id="email" name="email" value="{{ old('email') }}" placeholder="nama@perusahaan.com" required type="email" autofocus>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-low dark:bg-surface-dim/10 border-2 border-transparent focus:border-primary dark:focus:border-secondary-container rounded-xl text-on-surface dark:text-on-primary-container placeholder:text-outline/50 transition-all outline-none" id="email" name="email" value="{{ old('email') }}" placeholder="nama@email.com" required type="email" autofocus>
                         </div>
                     </div>
                     

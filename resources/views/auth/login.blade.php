@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Masuk - Telkomsel Inventory Management</title>
+    <title>Masuk - CatetAja Inventory Management</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
@@ -69,7 +69,7 @@
             
             <div class="relative z-20 w-full mb-10 md:mb-0 max-w-xl">
                 <h1 class="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-white mb-4 tracking-tight">
-                    Atur Pengelolaan Inventarismu dengan Telkomsel Inventory!
+                    Atur Pengelolaan Inventarismu dengan CatetAja!
                 </h1>
                 <p class="text-white/90 text-body-lg font-body-lg max-w-md hidden md:block">
                     Solusi terpercaya untuk manajemen aset dan stok barang dengan kecepatan serta akurasi standar industri.
@@ -107,7 +107,7 @@
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-outline dark:text-outline-variant">
                                 <span class="material-symbols-outlined" data-icon="mail">mail</span>
                             </span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-low dark:bg-surface-dim/10 border-2 border-transparent focus:border-primary dark:focus:border-secondary-container rounded-xl text-on-surface dark:text-on-primary-container placeholder:text-outline/50 transition-all outline-none" id="email" name="email" value="{{ old('email') }}" placeholder="nama@perusahaan.com" required type="email">
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-low dark:bg-surface-dim/10 border-2 border-transparent focus:border-primary dark:focus:border-secondary-container rounded-xl text-on-surface dark:text-on-primary-container placeholder:text-outline/50 transition-all outline-none" id="email" name="email" value="{{ old('email') }}" placeholder="nama@email.com" required type="email">
                         </div>
                     </div>
                     
@@ -151,6 +151,20 @@
         </section>
     </main>
 
+    <div id="global-loader" class="fixed inset-0 z-[9999] bg-white/80 dark:bg-on-background/90 backdrop-blur-sm flex flex-col justify-center items-center hidden transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="relative flex flex-col items-center">
+            <div class="absolute -inset-6 border-[6px] border-surface-container-low dark:border-surface-dim/20 border-t-primary dark:border-t-secondary-container rounded-full animate-spin"></div>
+            
+            <div class="bg-white dark:bg-surface-dim/10 p-3 rounded-full shadow-lg shadow-primary/20 z-10 flex items-center justify-center">
+                <img src="{{ asset('images/telkomsel-logo.png') }}" alt="Loading" class="h-10 w-10 object-contain animate-pulse">
+            </div>
+            
+            <p class="mt-10 text-sm font-black text-primary dark:text-secondary-container uppercase tracking-widest animate-pulse">
+                Loading...
+            </p>
+        </div>
+    </div>
+
     <script>
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -189,10 +203,54 @@
             themeIcon.textContent = 'dark_mode';
         }
 
-        document.querySelectorAll('button').forEach(button => {
+        document.querySelectorAll('button:not(#theme-toggle)').forEach(button => {
             button.addEventListener('mousedown', () => button.style.opacity = '0.8');
             button.addEventListener('mouseup', () => button.style.opacity = '1');
             button.addEventListener('mouseleave', () => button.style.opacity = '1');
+        });
+
+        // --- SCRIPT LOADING OVERLAY ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('global-loader');
+
+            const showLoader = () => {
+                loader.classList.remove('hidden', 'pointer-events-none');
+                requestAnimationFrame(() => {
+                    loader.classList.remove('opacity-0');
+                    loader.classList.add('opacity-100');
+                });
+            };
+
+            const hideLoader = () => {
+                loader.classList.remove('opacity-100');
+                loader.classList.add('opacity-0');
+                setTimeout(() => {
+                    loader.classList.add('hidden', 'pointer-events-none');
+                }, 300);
+            };
+
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', () => {
+                    showLoader();
+                });
+            });
+
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const href = link.getAttribute('href');
+                    const target = link.getAttribute('target');
+                    
+                    if (href && href !== '#' && !href.startsWith('javascript') && target !== '_blank' && !href.includes('export')) {
+                        showLoader();
+                    }
+                });
+            });
+
+            window.addEventListener('pageshow', (e) => {
+                if (e.persisted) {
+                    hideLoader();
+                }
+            });
         });
     </script>
 </body>

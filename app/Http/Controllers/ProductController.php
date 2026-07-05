@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 
 class ProductController extends Controller
@@ -55,8 +56,8 @@ public function store(Request $request)
             'image.max'           => 'Ukuran gambar maksimal 2MB.'
         ]);
 
-        // 2. Ambil semua request kecuali image
-        $data = $request->except('image');
+        // 2. Ambil semua request kecuali image dan token CSRF
+        $data = $request->except(['image', '_token']);
 
         // 3. Logika Upload Gambar
         if ($request->hasFile('image')) {
@@ -95,32 +96,64 @@ public function store(Request $request)
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+ public function update(Request $request, string $id)
     {
-        // Validasi input
+        // 1. Validasi
         $request->validate([
-            'product_code' => 'required|string|unique:products,product_code,' . $id, // Abaikan validasi unique untuk ID ini
+            'product_code' => 'required|string|unique:products,product_code,' . $id,
             'name'         => 'required|string|max:255',
             'category_id'  => 'required|exists:categories,id',
             'stock'        => 'required|integer|min:0',
             'location'     => 'required|string|max:255',
             'condition'    => 'required|string|max:255',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $product = \App\Models\Product::findOrFail($id);
-        $product->update($request->all());
 
-        return redirect()->route('products.index')->with('success', 'Data barang berhasil diperbarui!');
+        // KUNCI 1: Buang 'image' dari request bawaan
+        $data = $request->except(['image', '_token', '_method']);
+
+        // Logika Gambar
+        if ($request->hasFile('image')) {
+            
+            // Hapus gambar lama jika ada
+            if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+            }
+            
+            // KUNCI 2: Simpan gambar baru
+            $imagePath = $request->file('image')->store('products', 'public');
+            
+            // KUNCI 3: Tumpuk array $data dengan path gambar yang benar
+            $data['image'] = $imagePath;
+        }
+
+        // KUNCI 4: Simpan ke database menggunakan variabel $data, BUKAN $request->all()
+        $product->update($data);
+
+        return redirect()->route('products.index')->with('success', 'Data barang berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
-    {
+   {
+        // KUNCI KEAMANAN: Tolak jika bukan Admin
+        if (\Illuminate\Support\Facades\Auth::user()->role->name !== 'Admin') {
+            return redirect()->back()->with('error', 'Akses Ditolak! Hanya Admin yang berhak menghapus data master barang.');
+        }
+
         $product = \App\Models\Product::findOrFail($id);
+        
+        // Hapus foto dari server jika barang memiliki foto
+        if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+        }
+
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Data barang berhasil dihapus!');
+        return redirect()->route('products.index')->with('success', 'Data barang beserta fotonya berhasil dihapus permanen!');
     }
 }

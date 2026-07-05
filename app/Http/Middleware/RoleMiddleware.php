@@ -20,10 +20,10 @@ class RoleMiddleware
         }
 
         // 2. Ambil role user
-        $userRole = Auth::user()->role->name;
+        $userRole = Auth::user()->role->name ?? null;
 
         // 3. Cek apakah role diizinkan (Gunakan in_array dengan benar)
-        if (in_array($userRole, $roles)) {
+        if ($userRole && in_array($userRole, $roles)) {
             return $next($request);
         }
 

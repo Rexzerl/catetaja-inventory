@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Dashboard - Telkomsel Inventory</title>
+    <title>Dashboard - CatetAja!</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -40,22 +40,41 @@
 </head>
 <body class="bg-surface dark:bg-slate-900 text-on-surface dark:text-white transition-colors duration-300 min-h-screen">
     
+    <!-- TopNavBar -->
     <nav class="bg-surface dark:bg-slate-800 border-b border-outline dark:border-slate-700 fixed top-0 w-full z-50 h-16 flex justify-between items-center px-4 md:px-margin-desktop">
         <div class="flex items-center gap-4">
             <img alt="Telkomsel Logo" class="h-8 object-contain" src="{{ asset('images/telkomsel-logo.png') }}">
-            <span class="text-xl font-black text-ts-red dark:text-ts-red-bright hidden md:block">Telkomsel Inventory</span>
+            <span class="text-xl font-black text-ts-red dark:text-ts-red-bright hidden md:block">CatetAja!</span>
         </div>
         <div class="flex items-center gap-6">
             <button class="p-2 hover:bg-surface-container-low dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center" onclick="toggleDarkMode()">
                 <span class="material-symbols-outlined" id="dark-mode-icon">dark_mode</span>
             </button>
-            <div class="flex items-center gap-3 border-l border-outline/20 pl-6 dark:border-slate-700">
-                <div class="text-right hidden sm:block">
-                    <p class="text-sm font-bold">{{ Auth::user()->name }}</p>
-                    <p class="text-[10px] text-on-surface-variant dark:text-slate-400 uppercase tracking-widest">{{ Auth::user()->role->name ?? 'User' }}</p>
-                </div>
-                <div class="w-10 h-10 rounded-full border-2 border-ts-red overflow-hidden">
-                    <img class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=bc0007&color=fff" alt="User Avatar">
+
+            <!-- WADAH DROPDOWN PROFIL & LOGOUT -->
+            <div class="relative group">
+                <button class="flex items-center gap-3 border-l border-outline/20 pl-6 dark:border-slate-700 focus:outline-none cursor-pointer py-1" id="profile-menu-btn">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-bold">{{ Auth::user()->name }}</p>
+                        <p class="text-[10px] text-on-surface-variant dark:text-slate-400 uppercase tracking-widest">{{ Auth::user()->role->name ?? 'User' }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full border-2 border-ts-red overflow-hidden">
+                        <img class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=bc0007&color=fff" alt="User Avatar">
+                    </div>
+                    <span class="material-symbols-outlined text-sm text-slate-400 group-hover:rotate-180 transition-transform duration-200">keyboard_arrow_down</span>
+                </button>
+
+                <!-- Dropdown Menu Logout -->
+                <div class="absolute right-0 top-full pt-3 w-48 hidden group-hover:block z-50" id="dropdown-menu">
+                    <div class="bg-white dark:bg-slate-800 border-2 border-black dark:border-slate-600 hard-shadow py-1">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button class="w-full flex items-center gap-3 px-4 py-3 text-ts-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-all text-sm font-bold text-left" type="submit">
+                                <span class="material-symbols-outlined text-[18px]">logout</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -79,16 +98,11 @@
             </a>
             @endif
         </div>
-        
-        <div class="mt-auto mb-8 space-y-2">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button class="w-full flex items-center gap-3 px-4 py-3 text-ts-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-all border border-transparent hover:border-ts-red" type="submit">
-                    <span class="material-symbols-outlined">logout</span>
-                    <span class="text-sm font-bold">Keluar Aplikasi</span>
-                </button>
-            </form>
-        </div>
+        @if((Auth::user()->role->name ?? '') === 'Admin')
+            <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low transition-all border border-transparent hover:border-black" href="{{ route('users.index') }}">
+                <span class="material-symbols-outlined">shield_person</span> <span class="text-sm">Kelola Akun (Admin)</span>
+            </a>
+            @endif
     </aside>
 
     <main class="pt-24 pb-20 md:pb-12 px-4 md:px-margin-desktop md:ml-64">
@@ -170,22 +184,18 @@
         </div>
     </main>
 
-    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface dark:bg-slate-800 border-t border-outline dark:border-slate-700 flex justify-around items-center py-3 z-50">
-        <a class="flex flex-col items-center text-ts-red" href="{{ route('dashboard') }}">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
-            <span class="text-[10px] font-bold uppercase mt-1">Dash</span>
-        </a>
-        @if(in_array(Auth::user()->role->name ?? 'Admin', ['Admin', 'Manager', 'Staff']))
-        <a class="flex flex-col items-center text-on-surface-variant dark:text-slate-400" href="{{ route('products.index') }}">
-            <span class="material-symbols-outlined">inventory_2</span>
-            <span class="text-[10px] font-bold uppercase mt-1">Inv</span>
-        </a>
-        <a class="flex flex-col items-center text-on-surface-variant dark:text-slate-400" href="{{ route('borrowings.index') }}">
-            <span class="material-symbols-outlined">handshake</span>
-            <span class="text-[10px] font-bold uppercase mt-1">Pinjam</span>
-        </a>
-        @endif
-    </nav>
+    <!-- Global Loading Overlay -->
+    <div id="global-loader" class="fixed inset-0 z-[9999] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col justify-center items-center hidden transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="relative flex flex-col items-center">
+            <div class="absolute -inset-6 border-[6px] border-surface-container-low dark:border-slate-800 border-t-ts-red dark:border-t-ts-red-bright rounded-full animate-spin"></div>
+            <div class="bg-white dark:bg-slate-800 p-3 rounded-full hard-shadow z-10 flex items-center justify-center">
+                <img src="{{ asset('images/telkomsel-logo.png') }}" alt="Loading" class="h-10 w-10 object-contain animate-pulse">
+            </div>
+            <p class="mt-10 text-sm font-black text-ts-red dark:text-white uppercase tracking-widest animate-pulse">
+                Loading...
+            </p>
+        </div>
+    </div>
 
     <script>
         // --- 1. DARK MODE LOGIC ---
@@ -256,7 +266,9 @@
             initChart();
         }
 
-        document.addEventListener('DOMContentLoaded', initChart);
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+        });
 
         // --- 3. EXPORT TO PDF LOGIC ---
         function exportToPDF() {
@@ -265,7 +277,7 @@
             const element = document.getElementById('cetak-pdf');
             const opt = {
                 margin:       [0.5, 0.5, 0.5, 0.5],
-                filename:     'Laporan_Inventaris_Telkomsel.pdf',
+                filename:     'Laporan_Inventaris_CatetAja!.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
@@ -275,6 +287,55 @@
                 document.getElementById('judul-pdf').classList.add('hidden');
             });
         }
+
+        // --- 4. DROPDOWN TOGGLE ---
+        const profileBtn = document.getElementById('profile-menu-btn');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        
+        if (profileBtn && dropdownMenu) {
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('hidden');
+            });
+            document.addEventListener('click', () => {
+                if (!dropdownMenu.classList.contains('hidden')) {
+                    dropdownMenu.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- 5. LOADING OVERLAY LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('global-loader');
+            const showLoader = () => {
+                loader.classList.remove('hidden', 'pointer-events-none');
+                requestAnimationFrame(() => {
+                    loader.classList.remove('opacity-0');
+                    loader.classList.add('opacity-100');
+                });
+            };
+            const hideLoader = () => {
+                loader.classList.remove('opacity-100');
+                loader.classList.add('opacity-0');
+                setTimeout(() => {
+                    loader.classList.add('hidden', 'pointer-events-none');
+                }, 300);
+            };
+
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', () => { showLoader(); });
+            });
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const href = link.getAttribute('href');
+                    const target = link.getAttribute('target');
+                    if (href && href !== '#' && !href.startsWith('javascript') && target !== '_blank' && !href.includes('export')) {
+                        showLoader();
+                    }
+                });
+            });
+            window.addEventListener('pageshow', (e) => { if (e.persisted) hideLoader(); });
+        });
     </script>
 </body>
 </html>

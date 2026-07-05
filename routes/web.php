@@ -3,10 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BorrowingController;
+use App\Http\UserControllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', [App\Http\Controllers\BorrowingController::class, 'dashboard'])
@@ -26,9 +27,13 @@ Route::middleware('auth')->group(function () {
     // CRUD Master Data Barang (Hanya Admin dan Staff)
     Route::middleware(['role:Admin,Staff,Manager'])->group(function() {
         Route::resource('products', ProductController::class);
-        Route::put('borrowings/{id}/return', [App\Http\Controllers\BorrowingController::class, 'returnDevice'])->name('borrowings.return');
+        Route::put('borrowings/{id}/return', [App\Http\Controllers\BorrowingController::class, 'update'])->name('borrowings.return');
         Route::resource('borrowings',BorrowingController::class)->only (['index', 'create', 'store']);
     });
-});
 
+    Route::middleware(['role:Admin'])->group(function() {
+        Route::delete('borrowings/{id}', [App\Http\Controllers\BorrowingController::class, 'destroy'])->name('borrowings.destroy');
+        Route::resource('users', \App\Http\Controllers\UserController::class)->only(['index', 'destroy', 'update']);
+});
+});
 require __DIR__.'/auth.php';

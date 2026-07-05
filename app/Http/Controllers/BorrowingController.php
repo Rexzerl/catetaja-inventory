@@ -25,58 +25,74 @@ class BorrowingController extends Controller
         return view('borrowings.create', compact('products'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'employee_name' => 'required|string|max:255',
-            'borrow_date' => 'required|date',
-            'product_id'  => 'required|exists:products,id',
-            'quantity'    => 'required|integer|min:1',
+public function store(Request $request)
+{
+    $request->validate([
+        'employee_name' => 'required|string|max:255',
+        'borrow_date'   => 'required|date',
+        'product_id'    => 'required|exists:products,id',
+        'quantity'      => 'required|integer|min:1',
+    ]);
+
+    $product = Product::findOrFail($request->product_id);
+
+    // Cek stok awal
+    if ($product->stock < $request->quantity) {
+        return redirect()->back()->withInput()->with('error', "Stok tidak mencukupi! Sisa stok {$product->name} saat ini hanya {$product->stock} unit.");
+    }
+
+    DB::beginTransaction();
+    try {
+        $borrowing = Borrowing::create([
+            'user_id'       => Auth::id(), 
+            'employee_name' => $request->employee_name,
+            'borrow_date'   => $request->borrow_date,
+            'status'        => 'Dipinjam',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        BorrowingDetail::create([
+            'borrowing_id' => $borrowing->id,
+            'product_id'   => $product->id,
+            'quantity'     => $request->quantity,
+            'item_status'  => 'Baik',
+        ]);
 
-        if ($product->stock < $request->quantity) {
-            return redirect()->back()->withInput()->with('error', "Stok tidak mencukupi! Sisa stok {$product->name} saat ini hanya {$product->stock} unit.");
-        }
+        // Update product stock
+        $product->decrement('stock', $request->quantity);
 
-        DB::beginTransaction();
-        try {
-                $borrowing = Borrowing::create([
-                'user_id'       => Auth::id(), 
-                'employee_name' => $request->employee_name, // <-- WAJIB ADA BARIS INI
-                'borrow_date'   => $request->borrow_date,
-                'status'        => 'Dipinjam',
-            ]);
+        $product->refresh(); 
+            
+            // Ambil sisa stok yang benar-benar baru
+            $sisaStok = $product->stock; 
+            
+            $message = 'Peminjaman berhasil ditambahkan.';
 
-            BorrowingDetail::create([
-                'borrowing_id' => $borrowing->id,
-                'product_id'   => $product->id,
-                'quantity'     => $request->quantity,
-                'item_status'  => 'Baik',
-            ]);
+            // Jika sisa stok <= 3, tampilkan peringatan
+            if ($sisaStok <= 3) {
+                $message .= " Peringatan: Stok barang ini menipis, tersisa {$sisaStok} unit.";
+            }
 
-            // Update product stock
-            $product->decrement('stock', $request->quantity);
-
-            DB::commit();
-            return redirect()->route('borrowings.index')->with('success', 'Peminjaman berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan data peminjaman.'.$e->getMessage());
-        }
+        DB::commit();
+        return redirect()->route('borrowings.index')->with('success', $message);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan data peminjaman. ' . $e->getMessage());
     }
-    public function returnDevice(string $id)
+}
+    // Ganti nama dari returnDevice menjadi update, dan tambahkan parameter Request
+    public function update(Request $request, string $id)
     {
         $borrowing = Borrowing::with('details')->findOrFail($id);
 
+        // Sesuaikan teks dengan kondisi UI ('Kembali')
         if ($borrowing->status === 'Dikembalikan') {
             return redirect()->back()->with('error', 'Barang sudah dikembalikan.');
         }
 
         DB::beginTransaction();
         try {
-            $borrowing->status = 'Dikembalikan';
+            $borrowing->status = 'Dikembalikan'; 
             $borrowing->return_date = now()->toDateString();
             $borrowing->save();
 
@@ -87,11 +103,32 @@ class BorrowingController extends Controller
 
             DB::commit();
             return redirect()->route('borrowings.index')->with('success', 'Barang berhasil dikembalikan.');
-    } catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengembalikan barang.'.$e->getMessage());
         }
     }
+
+    public function destroy(string $id)
+    {
+        if (Auth::user()->role->name !== 'Admin') {
+            return redirect()->back()->with('error', 'Akses Ditolak! Hanya Admin yang berhak menghapus riwayat peminjaman.');
+        }
+
+        $borrowing = Borrowing::findOrFail($id);
+
+        // Validasi: Jangan izinkan hapus riwayat jika barang belum dikembalikan
+        if ($borrowing->status === 'Dipinjam') {
+            return redirect()->back()->with('error', 'Gagal! Barang masih berstatus "Dipinjam". Harap selesaikan pengembalian terlebih dahulu sebelum menghapus riwayat.');
+        }
+
+        // Hapus relasi detail peminjaman terlebih dahulu, lalu hapus riwayat utamanya
+        $borrowing->details()->delete();
+        $borrowing->delete();
+
+        return redirect()->route('borrowings.index')->with('success', 'Riwayat peminjaman berhasil dibersihkan!');
+    }
+    
 
     public function dashboard()
     {
@@ -122,34 +159,62 @@ class BorrowingController extends Controller
 
     public function exportExcel()
     {
+        // 1. Ambil Data
         $tersedia = Product::sum('stock');
         $dipinjam = BorrowingDetail::whereHas('borrowing', function($query) {
             $query->where('status', 'Dipinjam');
         })->sum('quantity');
         $totalBarang = $tersedia + $dipinjam;
 
-        $fileName = "Laporan_Inventaris_" . date('Y-m-d') . ".csv";
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-        // Header Kolom di Excel
-        $columns = ['Kategori Data', 'Jumlah Unit'];
+        // 2. Siapkan Nama File (Ubah ekstensi menjadi .xls)
+        $fileName = "Laporan_Ringkasan_Inventaris_" . date('Y-m-d') . ".xls";
 
-        // Menulis data langsung ke output stream
-        $callback = function() use($totalBarang, $dipinjam, $tersedia, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            fputcsv($file, ['Total Keseluruhan Barang', $totalBarang]);
-            fputcsv($file, ['Barang Sedang Dipinjam', $dipinjam]);
-            fputcsv($file, ['Barang Tersedia (Gudang)', $tersedia]);
-            fclose($file);
-        };
+        // 3. Susun Tabel HTML dengan sedikit styling CSS
+        $html = '
+        <html>
+        <head>
+            <style>
+                table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }
+                th { background-color: #bc0007; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 10px; text-align: left; }
+                td { border: 1px solid #000000; padding: 10px; }
+                h2 { font-family: Arial, sans-serif; color: #bc0007; }
+                p { font-family: Arial, sans-serif; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <h2>Laporan Ringkasan Inventaris </h2>
+            <p><strong>Tanggal Cetak:</strong> ' . date('d-m-Y H:i:s') . ' WIB</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th width="300">Kategori Data</th>
+                        <th width="150">Jumlah Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total Keseluruhan Barang (Sistem)</td>
+                        <td align="center"><strong>' . $totalBarang . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Barang Sedang Dipinjam</td>
+                        <td align="center"><strong>' . $dipinjam . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Barang Tersedia (Di Gudang)</td>
+                        <td align="center"><strong>' . $tersedia . '</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </body>
+        </html>
+        ';
 
-        return response()->stream($callback, 200, $headers);
+        // 4. Return response dengan header khusus Excel
+        return response($html)
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
 }
 
