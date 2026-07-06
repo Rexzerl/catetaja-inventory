@@ -184,9 +184,9 @@
                                 @endif
 
                                 @if((Auth::user()->role->name ?? '') === 'Admin' && $borrowing->status !== 'Dipinjam')
-                                <form action="{{ route('borrowings.destroy', $borrowing->id) }}" method="POST" onsubmit="return confirm('Hapus permanen riwayat ini?');">
+                               <form action="{{ route('borrowings.destroy', $borrowing->id) }}" method="POST" id="form-delete-{{ $borrowing->id }}">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="bg-ts-red hover:bg-red-800 text-white p-1 rounded transition-colors" title="Hapus Riwayat">
+                                    <button type="button" onclick="openDeleteModal('form-delete-{{ $borrowing->id }}')" class="bg-ts-red hover:bg-red-800 text-white p-1 rounded transition-colors" title="Hapus Riwayat">
                                         <span class="material-symbols-outlined text-[16px]">delete</span>
                                     </button>
                                 </form>
@@ -219,6 +219,17 @@
         </div>
     </div>
 
+    <div id="delete-modal" class="fixed inset-0 z-[10000] hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 border-2 border-black dark:border-slate-600 hard-shadow p-6 w-full max-w-sm">
+        <h3 class="text-lg font-black text-ts-red mb-3 uppercase">Konfirmasi Hapus</h3>
+        <p class="text-sm text-on-surface-variant dark:text-slate-300 mb-6">Apakah Anda yakin ingin menghapus permanen riwayat ini? Data yang dihapus tidak dapat dikembalikan.</p>
+        <div class="flex gap-3">
+            <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2 border-2 border-black dark:border-slate-500 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Batal</button>
+            <button type="button" id="delete-submit-btn" class="flex-1 py-2 bg-ts-red text-white font-bold border border-black hover:bg-red-800 transition-colors">Hapus</button>
+        </div>
+    </div>
+</div>
+
     <div id="global-loader" class="fixed inset-0 z-[9999] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col justify-center items-center hidden transition-opacity duration-300 opacity-0 pointer-events-none">
         <div class="relative flex flex-col items-center">
             <div class="absolute -inset-6 border-[6px] border-surface-container-low dark:border-slate-800 border-t-ts-red dark:border-t-ts-red-bright rounded-full animate-spin"></div>
@@ -242,6 +253,25 @@
             document.getElementById('confirm-modal').classList.add('hidden');
             targetFormId = null;
         }
+                // Modal Konfirmasi Hapus Logic
+        let targetDeleteFormId = null;
+
+        function openDeleteModal(formId) {
+            targetDeleteFormId = formId;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            targetDeleteFormId = null;
+        }
+
+        document.getElementById('delete-submit-btn').addEventListener('click', () => {
+            if (targetDeleteFormId) {
+                document.getElementById('delete-modal').classList.add('hidden');
+                document.getElementById(targetDeleteFormId).submit();
+            }
+        });
         document.getElementById('confirm-submit-btn').addEventListener('click', () => {
             if (targetFormId) {
                 document.getElementById('confirm-modal').classList.add('hidden');
