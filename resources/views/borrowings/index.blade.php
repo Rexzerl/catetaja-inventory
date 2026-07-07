@@ -33,12 +33,42 @@
         .hard-shadow { box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1); }
         .dark .hard-shadow { box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.1); }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .btn-hamburger {
+            display: none;
+            font-size: 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: inherit;
+        }
+
+        @media (max-width: 768px) {
+            .btn-hamburger {
+                display: inline-block;
+            }
+            
+            #sidebar-kiri {
+                display: flex !important; /* Menimpa class 'hidden' bawaan tailwind di mode HP */
+                position: fixed;
+                top: 0;
+                left: -100%;
+                height: 100vh;
+                z-index: 9999;
+                transition: left 0.3s ease-in-out;
+            }
+
+            #sidebar-kiri.muncul {
+                left: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-surface dark:bg-slate-900 text-on-surface dark:text-white transition-colors duration-300 min-h-screen">
     
     <nav class="bg-surface dark:bg-slate-800 border-b border-outline dark:border-slate-700 fixed top-0 w-full z-50 h-16 flex justify-between items-center px-4 md:px-margin-desktop">
         <div class="flex items-center gap-4">
+            <button id="tombol-menu" class="btn-hamburger">☰</button>
             <img alt="Telkomsel Logo" class="h-8 object-contain" src="{{ asset('images/telkomsel-logo.png') }}">
             <span class="text-xl font-black text-ts-red dark:text-ts-red-bright hidden md:block">CatetAja!</span>
         </div>
@@ -310,6 +340,15 @@
                 if (!dropdownMenu.classList.contains('hidden')) {
                     dropdownMenu.classList.add('hidden');
                 }
+            });
+        }
+
+        const tombolMenu = document.getElementById('tombol-menu');
+        const sidebar = document.getElementById('sidebar-kiri');
+
+        if (tombolMenu && sidebar) {
+            tombolMenu.addEventListener('click', function() {
+                sidebar.classList.toggle('muncul');
             });
         }
 

@@ -29,12 +29,6 @@
         .dark .hard-shadow { box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.1); }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .telkomsel-gradient { background: linear-gradient(135deg, #bc0007 0%, #fd9923 100%); }
-        
-        /* Drag & Drop Styles */
-        .drag-active {
-            border-color: #bc0007 !important;
-            background-color: rgba(188, 0, 7, 0.05) !important;
-        }
     </style>
 </head>
 <body class="bg-surface dark:bg-slate-900 text-on-surface dark:text-white transition-colors duration-300 min-h-screen">
