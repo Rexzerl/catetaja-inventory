@@ -1,59 +1,51 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CatetAja - Sistem Manajemen Inventaris
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 1. Tentang CatetAja
+CatetAja adalah aplikasi manajemen inventaris berbasis web yang dirancang untuk mengotomatisasi pencatatan barang dan pelacakan transaksi peminjaman inventaris kantor oleh karyawan. Fokus utama dari aplikasi ini adalah untuk menciptakan alur kerja yang terstruktur, aman, dan mudah dipantau oleh berbagai pihak yang berkepentingan di dalam perusahaan.
 
-## About Laravel
+## 2. Hak Akses
+* **Admin:** Memiliki kendali penuh atas sistem. Tugas utamanya adalah mengelola akun, yakni mengedit dan menghapus akun yang terdaftar.
+* **Staff:** Bertindak sebagai operator utama di lapangan. Staff bertanggung jawab atas pengelolaan operasional data barang (CRUD) serta mencatat seluruh alur transaksi peminjaman dan pengembalian barang oleh karyawan.
+* **Manager:** Memiliki akses pemantauan secara khusus (read-only). Manager menggunakan sistem ini untuk melihat laporan ketersediaan barang dan riwayat transaksi secara aktual guna keperluan evaluasi dan pengambilan keputusan.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 3. Alur Sistem
+**A. Manajemen Inventaris Barang**
+* **Menambah Barang Baru (Admin dan Staff)**
+  Login ke dalam sistem -> Masuk ke Halaman Inventaris Barang -> Klik tombol "Tambah Barang Baru" -> Isi formulir data barang -> Simpan data.
+* **Mengedit Data Barang (Admin dan Staff)**
+  Login ke dalam sistem -> Masuk ke Halaman Inventaris Barang -> Klik ikon Edit pada barang yang dituju -> Perbarui informasi barang -> Simpan perubahan.
+* **Melihat Rincian Barang (Admin, Staff, dan Manager)**
+  Login ke dalam sistem -> Masuk ke Halaman Inventaris Barang atau Halaman Laporan -> Klik ikon Detail (Mata) -> Informasi lengkap barang ditampilkan.
+* **Menghapus Barang (Admin)**
+  Login ke dalam sistem -> Masuk ke Halaman Inventaris Barang -> Klik ikon Hapus (Delete) pada barang yang dituju -> Sistem meminta konfirmasi -> Setujui penghapusan.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**B. Transaksi Peminjaman Barang**
+* **Mencatat Peminjaman Baru (Admin dan Staff)**
+  Login ke dalam sistem -> Masuk ke Halaman Data Peminjaman -> Klik tombol "Catat Peminjaman" -> Masukkan data peminjam dan barang yang dipinjam -> Simpan transaksi.
+* **Memproses Pengembalian Barang (Admin dan Staff)**
+  Login ke dalam sistem -> Masuk ke Halaman Data Peminjaman -> Cari riwayat transaksi yang sedang berjalan -> Klik tombol "Kembalikan" -> Konfirmasi penyelesaian pengembalian.
+* **Menghapus Riwayat Peminjaman (Admin)**
+  Login ke dalam sistem -> Masuk ke Halaman Data Peminjaman -> Klik ikon Hapus (Delete) pada riwayat yang dipilih -> Sistem meminta konfirmasi -> Setujui penghapusan.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**C. Manajemen Akun (Admin)**
+* **Mengelola Akun**
+  Login ke dalam sistem -> Masuk ke Halaman Kelola Akun -> Sistem menampilkan daftar seluruh pengguna yang terdaftar -> Admin dapat mengubah role atau menghapus akun pengguna dari sistem.
 
-## Learning Laravel
+**D. Laporan dan Dasbor**
+* **Melihat Laporan Tabel (Manager)**
+  Login ke dalam sistem sebagai Manager -> Akses menu Laporan Barang atau Laporan Peminjaman -> Rekapitulasi data ditampilkan secara menyeluruh.
+* **Mengunduh Laporan Excel/PDF (Admin, Staff, dan Manager)**
+  Login ke dalam sistem -> Masuk ke Halaman Dasbor utama -> Klik tombol unduh "Excel" atau "PDF" -> Dokumen rekapitulasi diunduh ke perangkat pengguna.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 4. Akun Login Testing
+* **Admin:**
+Email: admin123@gmail.com
+Password : admin123
+* **Staff:**
+Email : staff123@gmail.com
+Password : staff123
+* **Manager:**
+Email : manager123@gmail.com
+Password : manager123
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**JIKA REGISTER, OTOMATIS MASUK SEBAGAI STAFF**
